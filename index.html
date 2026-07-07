@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RailYatra — book trains, pay by UPI</title>
+    <!-- Tailwind via CDN keeps this deploy simple (no PostCSS build step needed).
+         For production at scale, swap this for a proper Tailwind build. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Only needed once you connect a real backend for real UPI payments (see /backend). -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
