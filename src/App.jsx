@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Train, ArrowRight, MapPin, Calendar, IndianRupee, CheckCircle2, QrCode, Ticket, Users, Clock, ChevronLeft, BedSingle, BedDouble, Armchair, Gauge, LogIn, LogOut, UserCircle2, History, ShieldCheck } from "lucide-react";
 
@@ -6,22 +5,22 @@ import { Train, ArrowRight, MapPin, Calendar, IndianRupee, CheckCircle2, QrCode,
 // BACKEND WIRING
 // Set this to your deployed server's URL (see /backend/README.md) to use
 // real seat inventory + real Razorpay UPI payments. Leave blank to run
-// fully self-contained using this artifact's persistent storage instead â€”
+// fully self-contained using this artifact's persistent storage instead -
 // everything still behaves like a real system (shared seat map, PNRs,
 // no OTP), it just isn't touching a live payment gateway.
 // =================================================================
-const BACKEND_URL = ""; // e.g. "https://your-railyatra-backend.onrender.com"
+const BACKEND_URL = ""; // e.g. "https://your-chukchuk-backend.onrender.com"
 
 // ---- Language support ---------------------------------------------
 // Covers the primary user-facing strings (nav, buttons, headers, key
 // labels). Passenger-entered data and less-common secondary text stay in
-// English for now â€” the dictionary is structured so more strings/languages
+// English for now - the dictionary is structured so more strings/languages
 // can be dropped in without touching component logic.
 const LANGUAGES = [
   { code: "en", label: "English" },
-  { code: "hi", label: "à¤¹à¤¿à¤‚à¤¦à¥€" },
-  { code: "ta", label: "à®¤à®®à®¿à®´à¯" },
-  { code: "bn", label: "à¦¬à¦¾à¦‚à¦²à¦¾" },
+  { code: "hi", label: "हिंदी" },
+  { code: "ta", label: "தமிழ்" },
+  { code: "bn", label: "বাংলা" },
 ];
 
 const TRANSLATIONS = {
@@ -43,7 +42,7 @@ const TRANSLATIONS = {
     passengers: "Passengers",
     continueToPay: "Continue to pay",
     payWithUpi: "Pay with UPI",
-    noOtpNote: "No cards, no OTP â€” approve the request in your UPI app.",
+    noOtpNote: "No cards, no OTP - approve the request in your UPI app.",
     amountPayable: "Amount payable",
     bookingConfirmed: "Booking confirmed",
     bookAnotherTicket: "Book another ticket",
@@ -52,82 +51,82 @@ const TRANSLATIONS = {
     staffAdmin: "Staff admin dashboard",
   },
   hi: {
-    bookATrain: "à¤Ÿà¥à¤°à¥‡à¤¨ à¤¬à¥à¤• à¤•à¤°à¥‡à¤‚",
-    tagline: "à¤–à¥‹à¤œà¥‡à¤‚, à¤…à¤ªà¤¨à¥€ à¤¸à¥€à¤Ÿ à¤šà¥à¤¨à¥‡à¤‚, UPI à¤¸à¥‡ à¤­à¥à¤—à¤¤à¤¾à¤¨ à¤•à¤°à¥‡à¤‚à¥¤ à¤¬à¤¸ à¤‡à¤¤à¤¨à¤¾ à¤¹à¥€à¥¤",
-    searchTrains: "à¤Ÿà¥à¤°à¥‡à¤¨à¥‡à¤‚ à¤–à¥‹à¤œà¥‡à¤‚",
-    pnrStatusCancel: "PNR à¤¸à¥à¤¥à¤¿à¤¤à¤¿ / à¤°à¤¦à¥à¤¦ à¤•à¤°à¥‡à¤‚",
-    liveTrainStatus: "à¤²à¤¾à¤‡à¤µ à¤Ÿà¥à¤°à¥‡à¤¨ à¤¸à¥à¤¥à¤¿à¤¤à¤¿",
-    logInSignUp: "à¤²à¥‰à¤— à¤‡à¤¨ / à¤¸à¤¾à¤‡à¤¨ à¤…à¤ª",
-    myBookings: "à¤®à¥‡à¤°à¥€ à¤¬à¥à¤•à¤¿à¤‚à¤—",
-    oneWay: "à¤à¤• à¤¤à¤°à¤«à¤¾",
-    roundTrip: "à¤°à¤¾à¤‰à¤‚à¤¡ à¤Ÿà¥à¤°à¤¿à¤ª",
-    multiCity: "à¤®à¤²à¥à¤Ÿà¥€-à¤¸à¤¿à¤Ÿà¥€",
-    from: "à¤¸à¥‡",
-    to: "à¤¤à¤•",
-    dateOfJourney: "à¤¯à¤¾à¤¤à¥à¤°à¤¾ à¤•à¥€ à¤¤à¤¾à¤°à¥€à¤–",
-    returnDate: "à¤µà¤¾à¤ªà¤¸à¥€ à¤•à¥€ à¤¤à¤¾à¤°à¥€à¤–",
-    passengers: "à¤¯à¤¾à¤¤à¥à¤°à¥€",
-    continueToPay: "à¤­à¥à¤—à¤¤à¤¾à¤¨ à¤œà¤¾à¤°à¥€ à¤°à¤–à¥‡à¤‚",
-    payWithUpi: "UPI à¤¸à¥‡ à¤­à¥à¤—à¤¤à¤¾à¤¨ à¤•à¤°à¥‡à¤‚",
-    noOtpNote: "à¤•à¥‹à¤ˆ à¤•à¤¾à¤°à¥à¤¡ à¤¨à¤¹à¥€à¤‚, à¤•à¥‹à¤ˆ OTP à¤¨à¤¹à¥€à¤‚ â€” à¤…à¤ªà¤¨à¥‡ UPI à¤à¤ª à¤®à¥‡à¤‚ à¤…à¤¨à¥à¤°à¥‹à¤§ à¤¸à¥à¤µà¥€à¤•à¥ƒà¤¤ à¤•à¤°à¥‡à¤‚à¥¤",
-    amountPayable: "à¤¦à¥‡à¤¯ à¤°à¤¾à¤¶à¤¿",
-    bookingConfirmed: "à¤¬à¥à¤•à¤¿à¤‚à¤— à¤ªà¥à¤·à¥à¤Ÿ à¤¹à¥à¤ˆ",
-    bookAnotherTicket: "à¤à¤• à¤”à¤° à¤Ÿà¤¿à¤•à¤Ÿ à¤¬à¥à¤• à¤•à¤°à¥‡à¤‚",
-    rewardsPoints: "à¤°à¤¿à¤µà¥‰à¤°à¥à¤¡ à¤ªà¥‰à¤‡à¤‚à¤Ÿà¥à¤¸",
-    mealPreOrder: "à¤­à¥‹à¤œà¤¨ à¤ªà¤¹à¤²à¥‡ à¤¸à¥‡ à¤‘à¤°à¥à¤¡à¤° à¤•à¤°à¥‡à¤‚",
-    staffAdmin: "à¤¸à¥à¤Ÿà¤¾à¤« à¤à¤¡à¤®à¤¿à¤¨ à¤¡à¥ˆà¤¶à¤¬à¥‹à¤°à¥à¤¡",
+    bookATrain: "ट्रेन बुक करें",
+    tagline: "खोजें, अपनी सीट चुनें, UPI से भुगतान करें। बस इतना ही।",
+    searchTrains: "ट्रेनें खोजें",
+    pnrStatusCancel: "PNR स्थिति / रद्द करें",
+    liveTrainStatus: "लाइव ट्रेन स्थिति",
+    logInSignUp: "लॉग इन / साइन अप",
+    myBookings: "मेरी बुकिंग",
+    oneWay: "एक तरफा",
+    roundTrip: "राउंड ट्रिप",
+    multiCity: "मल्टी-सिटी",
+    from: "से",
+    to: "तक",
+    dateOfJourney: "यात्रा की तारीख",
+    returnDate: "वापसी की तारीख",
+    passengers: "यात्री",
+    continueToPay: "भुगतान जारी रखें",
+    payWithUpi: "UPI से भुगतान करें",
+    noOtpNote: "कोई कार्ड नहीं, कोई OTP नहीं - अपने UPI ऐप में अनुरोध स्वीकृत करें।",
+    amountPayable: "देय राशि",
+    bookingConfirmed: "बुकिंग पुष्ट हुई",
+    bookAnotherTicket: "एक और टिकट बुक करें",
+    rewardsPoints: "रिवॉर्ड पॉइंट्स",
+    mealPreOrder: "भोजन पहले से ऑर्डर करें",
+    staffAdmin: "स्टाफ एडमिन डैशबोर्ड",
   },
   ta: {
-    bookATrain: "à®°à®¯à®¿à®²à¯ à®ªà®¤à®¿à®µà¯ à®šà¯†à®¯à¯à®¯à®µà¯à®®à¯",
-    tagline: "à®¤à¯‡à®Ÿà¯à®™à¯à®•à®³à¯, à®‰à®™à¯à®•à®³à¯ à®‡à®°à¯à®•à¯à®•à¯ˆà®¯à¯ˆà®¤à¯ à®¤à¯‡à®°à¯à®¨à¯à®¤à¯†à®Ÿà¯à®•à¯à®•à®µà¯à®®à¯, UPI à®®à¯‚à®²à®®à¯ à®ªà®£à®®à¯ à®šà¯†à®²à¯à®¤à¯à®¤à¯à®™à¯à®•à®³à¯.",
-    searchTrains: "à®°à®¯à®¿à®²à¯à®•à®³à¯ˆà®¤à¯ à®¤à¯‡à®Ÿà¯",
-    pnrStatusCancel: "PNR à®¨à®¿à®²à¯ˆ / à®°à®¤à¯à®¤à¯",
-    liveTrainStatus: "à®¨à¯‡à®°à®Ÿà®¿ à®°à®¯à®¿à®²à¯ à®¨à®¿à®²à¯ˆ",
-    logInSignUp: "à®‰à®³à¯à®¨à¯à®´à¯ˆ / à®ªà®¤à®¿à®µà¯ à®šà¯†à®¯à¯",
-    myBookings: "à®Žà®©à®¤à¯ à®ªà®¤à®¿à®µà¯à®•à®³à¯",
-    oneWay: "à®’à®°à¯ à®µà®´à®¿",
-    roundTrip: "à®°à®µà¯à®£à¯à®Ÿà¯ à®Ÿà®¿à®°à®¿à®ªà¯",
-    multiCity: "à®ªà®² à®¨à®•à®°à®®à¯",
-    from: "à®‡à®°à¯à®¨à¯à®¤à¯",
-    to: "à®µà®°à¯ˆ",
-    dateOfJourney: "à®ªà®¯à®£ à®¤à¯‡à®¤à®¿",
-    returnDate: "à®¤à®¿à®°à¯à®®à¯à®ªà¯à®®à¯ à®¤à¯‡à®¤à®¿",
-    passengers: "à®ªà®¯à®£à®¿à®•à®³à¯",
-    continueToPay: "à®ªà®£à®®à¯ à®šà¯†à®²à¯à®¤à¯à®¤ à®¤à¯Šà®Ÿà®°à®µà¯à®®à¯",
-    payWithUpi: "UPI à®®à¯‚à®²à®®à¯ à®šà¯†à®²à¯à®¤à¯à®¤à¯à®™à¯à®•à®³à¯",
-    noOtpNote: "à®•à®¾à®°à¯à®Ÿà¯ à®‡à®²à¯à®²à¯ˆ, OTP à®‡à®²à¯à®²à¯ˆ â€” à®‰à®™à¯à®•à®³à¯ UPI à®†à®ªà¯à®ªà®¿à®²à¯ à®’à®ªà¯à®ªà¯à®¤à®²à¯ à®…à®³à®¿à®•à¯à®•à®µà¯à®®à¯.",
-    amountPayable: "à®šà¯†à®²à¯à®¤à¯à®¤ à®µà¯‡à®£à¯à®Ÿà®¿à®¯ à®¤à¯Šà®•à¯ˆ",
-    bookingConfirmed: "à®ªà®¤à®¿à®µà¯ à®‰à®±à¯à®¤à®¿ à®šà¯†à®¯à¯à®¯à®ªà¯à®ªà®Ÿà¯à®Ÿà®¤à¯",
-    bookAnotherTicket: "à®®à®±à¯à®±à¯Šà®°à¯ à®Ÿà®¿à®•à¯à®•à¯†à®Ÿà¯ à®ªà®¤à®¿à®µà¯ à®šà¯†à®¯à¯à®¯à®µà¯à®®à¯",
-    rewardsPoints: "à®µà¯†à®•à¯à®®à®¤à®¿ à®ªà¯à®³à¯à®³à®¿à®•à®³à¯",
-    mealPreOrder: "à®‰à®£à®µà¯ˆ à®®à¯à®©à¯à®ªà®¤à®¿à®µà¯ à®šà¯†à®¯à¯à®¯à®µà¯à®®à¯",
-    staffAdmin: "à®¨à®¿à®°à¯à®µà®¾à®• à®Ÿà®¾à®·à¯à®ªà¯‹à®°à¯à®Ÿà¯",
+    bookATrain: "ரயில் பதிவு செய்யவும்",
+    tagline: "தேடுங்கள், உங்கள் இருக்கையைத் தேர்ந்தெடுக்கவும், UPI மூலம் பணம் செலுத்துங்கள்.",
+    searchTrains: "ரயில்களைத் தேடு",
+    pnrStatusCancel: "PNR நிலை / ரத்து",
+    liveTrainStatus: "நேரடி ரயில் நிலை",
+    logInSignUp: "உள்நுழை / பதிவு செய்",
+    myBookings: "எனது பதிவுகள்",
+    oneWay: "ஒரு வழி",
+    roundTrip: "ரவுண்ட் டிரிப்",
+    multiCity: "பல நகரம்",
+    from: "இருந்து",
+    to: "வரை",
+    dateOfJourney: "பயண தேதி",
+    returnDate: "திரும்பும் தேதி",
+    passengers: "பயணிகள்",
+    continueToPay: "பணம் செலுத்த தொடரவும்",
+    payWithUpi: "UPI மூலம் செலுத்துங்கள்",
+    noOtpNote: "கார்டு இல்லை, OTP இல்லை - உங்கள் UPI ஆப்பில் ஒப்புதல் அளிக்கவும்.",
+    amountPayable: "செலுத்த வேண்டிய தொகை",
+    bookingConfirmed: "பதிவு உறுதி செய்யப்பட்டது",
+    bookAnotherTicket: "மற்றொரு டிக்கெட் பதிவு செய்யவும்",
+    rewardsPoints: "வெகுமதி புள்ளிகள்",
+    mealPreOrder: "உணவை முன்பதிவு செய்யவும்",
+    staffAdmin: "நிர்வாக டாஷ்போர்டு",
   },
   bn: {
-    bookATrain: "à¦Ÿà§à¦°à§‡à¦¨ à¦¬à§à¦• à¦•à¦°à§à¦¨",
-    tagline: "à¦–à§à¦à¦œà§à¦¨, à¦†à¦ªà¦¨à¦¾à¦° à¦¸à¦¿à¦Ÿ à¦¬à§‡à¦›à§‡ à¦¨à¦¿à¦¨, UPI à¦¦à¦¿à¦¯à¦¼à§‡ à¦Ÿà¦¾à¦•à¦¾ à¦¦à¦¿à¦¨à¥¤ à¦¬à§à¦¯à¦¾à¦¸à¥¤",
-    searchTrains: "à¦Ÿà§à¦°à§‡à¦¨ à¦–à§à¦à¦œà§à¦¨",
-    pnrStatusCancel: "PNR à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸ / à¦¬à¦¾à¦¤à¦¿à¦²",
-    liveTrainStatus: "à¦²à¦¾à¦‡à¦­ à¦Ÿà§à¦°à§‡à¦¨ à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸",
-    logInSignUp: "à¦²à¦— à¦‡à¦¨ / à¦¸à¦¾à¦‡à¦¨ à¦†à¦ª",
-    myBookings: "à¦†à¦®à¦¾à¦° à¦¬à§à¦•à¦¿à¦‚",
-    oneWay: "à¦“à¦¯à¦¼à¦¾à¦¨ à¦“à¦¯à¦¼à§‡",
-    roundTrip: "à¦°à¦¾à¦‰à¦¨à§à¦¡ à¦Ÿà§à¦°à¦¿à¦ª",
-    multiCity: "à¦®à¦¾à¦²à§à¦Ÿà¦¿-à¦¸à¦¿à¦Ÿà¦¿",
-    from: "à¦¥à§‡à¦•à§‡",
-    to: "à¦ªà¦°à§à¦¯à¦¨à§à¦¤",
-    dateOfJourney: "à¦¯à¦¾à¦¤à§à¦°à¦¾à¦° à¦¤à¦¾à¦°à¦¿à¦–",
-    returnDate: "à¦«à§‡à¦°à¦¾à¦° à¦¤à¦¾à¦°à¦¿à¦–",
-    passengers: "à¦¯à¦¾à¦¤à§à¦°à§€",
-    continueToPay: "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨",
-    payWithUpi: "UPI à¦¦à¦¿à¦¯à¦¼à§‡ à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦•à¦°à§à¦¨",
-    noOtpNote: "à¦•à¦¾à¦°à§à¦¡ à¦¨à§‡à¦‡, OTP à¦¨à§‡à¦‡ â€” à¦†à¦ªà¦¨à¦¾à¦° UPI à¦…à§à¦¯à¦¾à¦ªà§‡ à¦…à¦¨à§à¦°à§‹à¦§ à¦…à¦¨à§à¦®à§‹à¦¦à¦¨ à¦•à¦°à§à¦¨à¥¤",
-    amountPayable: "à¦ªà§à¦°à¦¦à§‡à¦¯à¦¼ à¦ªà¦°à¦¿à¦®à¦¾à¦£",
-    bookingConfirmed: "à¦¬à§à¦•à¦¿à¦‚ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦¹à¦¯à¦¼à§‡à¦›à§‡",
-    bookAnotherTicket: "à¦†à¦°à§‡à¦•à¦Ÿà¦¿ à¦Ÿà¦¿à¦•à¦¿à¦Ÿ à¦¬à§à¦• à¦•à¦°à§à¦¨",
-    rewardsPoints: "à¦°à¦¿à¦“à¦¯à¦¼à¦¾à¦°à§à¦¡ à¦ªà¦¯à¦¼à§‡à¦¨à§à¦Ÿ",
-    mealPreOrder: "à¦–à¦¾à¦¬à¦¾à¦° à¦†à¦—à§‡ à¦¥à§‡à¦•à§‡ à¦…à¦°à§à¦¡à¦¾à¦° à¦•à¦°à§à¦¨",
-    staffAdmin: "à¦…à§à¦¯à¦¾à¦¡à¦®à¦¿à¦¨ à¦¡à§à¦¯à¦¾à¦¶à¦¬à§‹à¦°à§à¦¡",
+    bookATrain: "ট্রেন বুক করুন",
+    tagline: "খুঁজুন, আপনার সিট বেছে নিন, UPI দিয়ে টাকা দিন। ব্যাস।",
+    searchTrains: "ট্রেন খুঁজুন",
+    pnrStatusCancel: "PNR স্ট্যাটাস / বাতিল",
+    liveTrainStatus: "লাইভ ট্রেন স্ট্যাটাস",
+    logInSignUp: "লগ ইন / সাইন আপ",
+    myBookings: "আমার বুকিং",
+    oneWay: "ওয়ান ওয়ে",
+    roundTrip: "রাউন্ড ট্রিপ",
+    multiCity: "মাল্টি-সিটি",
+    from: "থেকে",
+    to: "পর্যন্ত",
+    dateOfJourney: "যাত্রার তারিখ",
+    returnDate: "ফেরার তারিখ",
+    passengers: "যাত্রী",
+    continueToPay: "পেমেন্ট চালিয়ে যান",
+    payWithUpi: "UPI দিয়ে পেমেন্ট করুন",
+    noOtpNote: "কার্ড নেই, OTP নেই - আপনার UPI অ্যাপে অনুরোধ অনুমোদন করুন।",
+    amountPayable: "প্রদেয় পরিমাণ",
+    bookingConfirmed: "বুকিং নিশ্চিত হয়েছে",
+    bookAnotherTicket: "আরেকটি টিকিট বুক করুন",
+    rewardsPoints: "রিওয়ার্ড পয়েন্ট",
+    mealPreOrder: "খাবার আগে থেকে অর্ডার করুন",
+    staffAdmin: "অ্যাডমিন ড্যাশবোর্ড",
   },
 };
 
@@ -136,7 +135,7 @@ function translate(lang, key) {
 }
 
 // ---- Meal pre-ordering ----------------------------------------------
-// Only offered on classes with a pantry car in real IRCTC practice â€” AC
+// Only offered on classes with a pantry car in real IRCTC practice - AC
 // classes on longer-distance trains. Sleeper passengers see a note instead.
 const MEAL_OPTIONS = [
   { id: "none", label: "No meal", price: 0 },
@@ -189,7 +188,7 @@ const CLASSES = [
   { code: "1A", label: "AC First", fare: 6.2 },
 ];
 
-// One 8-berth bay, repeated to form a coach â€” matches real Sleeper/3A layout
+// One 8-berth bay, repeated to form a coach - matches real Sleeper/3A layout
 const BERTH_PATTERN = ["LB", "MB", "UB", "LB", "MB", "UB", "SL", "SU"];
 const BAYS_PER_COACH = 9; // 72 seats, real Sleeper coach capacity
 const BERTH_LABEL = { LB: "Lower", MB: "Middle", UB: "Upper", SL: "Side Lower", SU: "Side Upper" };
@@ -242,12 +241,49 @@ async function fetchSeats(trainId, date, classCode) {
     const seats = [];
     for (let bay = 0; bay < BAYS_PER_COACH; bay++) {
       BERTH_PATTERN.forEach((type, i) => {
-        seats.push({ seatNo: bay * 8 + i + 1, type, booked: Math.random() < 0.3 });
+        const seatNo = bay * 8 + i + 1;
+        // Real IRCTC reserves a small slice of every coach for Tatkal quota,
+        // held back from general sale until the Tatkal window opens.
+        const quota = seatNo % 8 === 0 ? "tatkal" : "general";
+        seats.push({ seatNo, type, booked: Math.random() < 0.3, quota });
       });
     }
     await window.storage.set(key, JSON.stringify(seats), true);
     return seats;
   }
+}
+
+function freeSeatsByQuota(seats, quota) {
+  return seats.filter((s) => !s.booked && s.quota === quota);
+}
+
+// ---- Tatkal booking window --------------------------------------
+// Real IRCTC rule: Tatkal opens at 10:00 for AC classes and 11:00 for
+// non-AC (Sleeper) on the day *before* the journey date, and stays open
+// until departure (subject to availability). This mirrors that.
+const TATKAL_SURCHARGE_PERCENT = { SL: 20, "3A": 30, "2A": 30, "1A": 30 };
+
+function tatkalWindow(journeyDateStr, classCode) {
+  const journeyDate = new Date(`${journeyDateStr}T00:00:00`);
+  const opensAt = new Date(journeyDate);
+  opensAt.setDate(opensAt.getDate() - 1);
+  opensAt.setHours(classCode === "SL" ? 11 : 10, 0, 0, 0);
+
+  const now = new Date();
+  const isOpen = now >= opensAt && now < journeyDate;
+  const hasPassed = now >= journeyDate;
+  return { opensAt, isOpen, hasPassed, msUntilOpen: opensAt - now };
+}
+
+function formatCountdown(ms) {
+  if (ms <= 0) return "now";
+  const totalMinutes = Math.floor(ms / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 async function holdSeats(trainId, date, classCode, seatNos) {
@@ -264,7 +300,7 @@ async function holdSeats(trainId, date, classCode, seatNos) {
   const stored = await window.storage.get(key, true);
   const seats = JSON.parse(stored.value);
   const taken = seatNos.filter((no) => seats.find((s) => s.seatNo === no)?.booked);
-  if (taken.length) throw new Error(`Seat ${taken.join(", ")} was just taken â€” pick another`);
+  if (taken.length) throw new Error(`Seat ${taken.join(", ")} was just taken - pick another`);
   seats.forEach((s) => {
     if (seatNos.includes(s.seatNo)) s.booked = true;
   });
@@ -281,7 +317,7 @@ async function releaseSeatsLocal(trainId, date, classCode, seatNos) {
   await window.storage.set(key, JSON.stringify(seats), true);
 }
 
-// ---- Local waitlist/RAC queue â€” mirrors the backend's reserveOrWaitlist()
+// ---- Local waitlist/RAC queue - mirrors the backend's reserveOrWaitlist()
 // logic in server.js, using shared persistent storage as the "queue table". ----
 
 const RAC_CAP = 4;
@@ -299,10 +335,17 @@ async function getWaitlistQueueLocal(trainId, date, classCode) {
 }
 
 function freeSeatCount(seats) {
-  return seats.filter((s) => !s.booked).length;
+  return seats.filter((s) => !s.booked && s.quota !== "tatkal").length;
 }
 
-// Preview only â€” does not mutate the queue or seat map.
+// Only shows seats belonging to the given quota as available; everything
+// else (wrong quota, or already booked) renders as taken, same as real IRCTC
+// holding Tatkal seats back from the general pool and vice versa.
+function visibleSeatsForQuota(seats, quota) {
+  return seats.map((s) => (s.quota === quota ? s : { ...s, booked: true }));
+}
+
+// Preview only - does not mutate the queue or seat map.
 async function previewReservation(trainId, date, classCode, count) {
   const seats = await fetchSeats(trainId, date, classCode);
   const queue = await getWaitlistQueueLocal(trainId, date, classCode);
@@ -323,7 +366,7 @@ async function reserveOrWaitlistLocal(trainId, date, classCode, count, pnr) {
   const free = freeSeatCount(seats);
 
   if (queue.length === 0 && free >= count) {
-    const seatNos = seats.filter((s) => !s.booked).slice(0, count).map((s) => s.seatNo);
+    const seatNos = seats.filter((s) => !s.booked && s.quota !== "tatkal").slice(0, count).map((s) => s.seatNo);
     seats.forEach((s) => {
       if (seatNos.includes(s.seatNo)) s.booked = true;
     });
@@ -337,6 +380,38 @@ async function reserveOrWaitlistLocal(trainId, date, classCode, count, pnr) {
   queue.push({ pnr, count, status, position });
   await window.storage.set(waitlistKey(trainId, date, classCode), JSON.stringify(queue), true);
   return { status, position, seatNos: [] };
+}
+
+// Tatkal quota is a separate, much smaller seat pool held back until the
+// Tatkal window opens. No RAC here (matches real IRCTC Tatkal behaviour for
+// most classes) -- it's confirmed from the Tatkal pool, or waitlisted.
+async function reserveOrWaitlistTatkalLocal(trainId, date, classCode, count, pnr) {
+  const key = seatKey(trainId, date, classCode);
+  const stored = await window.storage.get(key, true);
+  const seats = JSON.parse(stored.value);
+  const tatkalQueueKey = waitlistKey(trainId, date, classCode) + ":tatkal";
+  let queue = [];
+  try {
+    const q = await window.storage.get(tatkalQueueKey, true);
+    queue = JSON.parse(q.value);
+  } catch {
+    queue = [];
+  }
+
+  const freeTatkal = freeSeatsByQuota(seats, "tatkal").length;
+  if (queue.length === 0 && freeTatkal >= count) {
+    const seatNos = seats.filter((s) => !s.booked && s.quota === "tatkal").slice(0, count).map((s) => s.seatNo);
+    seats.forEach((s) => {
+      if (seatNos.includes(s.seatNo)) s.booked = true;
+    });
+    await window.storage.set(key, JSON.stringify(seats), true);
+    return { status: "confirmed", seatNos };
+  }
+
+  const position = queue.length + 1;
+  queue.push({ pnr, count, status: "WL", position });
+  await window.storage.set(tatkalQueueKey, JSON.stringify(queue), true);
+  return { status: "WL", position, seatNos: [] };
 }
 
 // Promotes the front of the queue into freed seats after a CNF cancellation. Returns the promoted PNR or null.
@@ -372,12 +447,12 @@ async function promoteWaitlistLocal(trainId, date, classCode) {
     booking.waitlistStatus = null;
     await window.storage.set(`bookings:${next.pnr}`, JSON.stringify(booking), true);
   } catch {
-    /* booking record missing â€” nothing to promote */
+    /* booking record missing - nothing to promote */
   }
   return next.pnr;
 }
 
-// Same tiered cancellation schedule as the backend's refundPercentage() â€” see
+// Same tiered cancellation schedule as the backend's refundPercentage() - see
 // /backend/server.js for the real-money version.
 function refundPercentage(hoursBeforeDeparture) {
   if (hoursBeforeDeparture >= 48) return 0.95;
@@ -386,15 +461,26 @@ function refundPercentage(hoursBeforeDeparture) {
   return 0;
 }
 
-// Same deterministic simulation as the backend's /api/live-status route â€” see
+// Same deterministic simulation as the backend's /api/live-status route - see
 // /backend/server.js for the version that can proxy a real provider.
+function formatDelay(minutes) {
+  if (minutes <= 0) return "On time";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h > 0 && m > 0) return `${h} hr ${m} min late`;
+  if (h > 0) return `${h} hr late`;
+  return `${m} min late`;
+}
+
 function simulateLiveStatus(trainNumber, date) {
   let seed = 0;
   for (const ch of `${trainNumber}${date}`) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
   const rand = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 2 ** 32);
   const stops = ["Origin", "Junction A", "Junction B", "Junction C", "Junction D", "Destination"];
   const currentIdx = Math.floor(rand() * (stops.length - 1));
-  const delayMinutes = Math.floor(rand() * 90);
+  // Up to 3 hours delay -- more representative of real Indian Railways running status than a 90-min cap.
+  const delayMinutes = Math.floor(rand() * 180);
+  const etaNextStationMinutes = Math.floor(rand() * 40) + 5;
   return {
     source: "simulated",
     trainNumber,
@@ -402,7 +488,10 @@ function simulateLiveStatus(trainNumber, date) {
     currentStation: stops[currentIdx],
     nextStation: stops[currentIdx + 1],
     delayMinutes,
-    status: delayMinutes === 0 ? "On time" : `Running late by ${delayMinutes} min`,
+    delayHours: Math.floor(delayMinutes / 60),
+    delayMinutesRemainder: delayMinutes % 60,
+    etaNextStationMinutes,
+    status: formatDelay(delayMinutes),
     lastUpdated: new Date().toISOString(),
   };
 }
@@ -438,7 +527,7 @@ function Header({ onBack }) {
           <Train size={18} />
         </div>
         <span className="font-black tracking-tight text-blue-950 text-lg" style={{ fontFamily: "Georgia, serif" }}>
-          RailYatra
+          ChukChuk
         </span>
       </div>
     </div>
@@ -448,14 +537,14 @@ function Header({ onBack }) {
 function StationInput({ label, value, onChange, iconColor, otherCode }) {
   const [query, setQuery] = useState(() => {
     const s = findStation(value);
-    return `${s.name} â€” ${s.code}`;
+    return `${s.name} - ${s.code}`;
   });
   const [open, setOpen] = useState(false);
-  const results = searchStations(query.includes("â€”") ? "" : query);
+  const results = searchStations(query.includes("-") ? "" : query);
 
   function pick(s) {
     onChange(s.code);
-    setQuery(`${s.name} â€” ${s.code}`);
+    setQuery(`${s.name} - ${s.code}`);
     setOpen(false);
   }
 
@@ -543,7 +632,7 @@ function SeatMap({ seats, needed, selected, onToggle }) {
                       ? "opacity-40 cursor-not-allowed " + BERTH_TINT[s.type]
                       : BERTH_TINT[s.type] + " hover:brightness-95"
                   }`}
-                  title={`${BERTH_LABEL[s.type]} berth ${s.seatNo}${s.booked ? " Â· taken" : ""}`}
+                  title={`${BERTH_LABEL[s.type]} berth ${s.seatNo}${s.booked ? " . taken" : ""}`}
                 >
                   <Icon size={13} />
                   <span className="text-[10px] font-bold">{s.seatNo}</span>
@@ -557,9 +646,131 @@ function SeatMap({ seats, needed, selected, onToggle }) {
   );
 }
 
-// Fare comparison / cheapest-available-class finder â€” shows every class's
+// Fare comparison / cheapest-available-class finder - shows every class's
 // price alongside what a booking would actually get right now (CNF/RAC/WL),
 // so "cheapest fare" and "cheapest seat you'll actually get" aren't confused.
+// Shows real, live seat availability (general quota) right on the class
+// picker, so people can see before tapping in whether a class is wide open,
+// tight, or already full (WL) for their date.
+function ClassAvailabilityButton({ train, date, cls, onPick }) {
+  const [avail, setAvail] = useState(null); // { general, tatkal } free seat counts
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const seats = await fetchSeats(train.id, date, cls.code);
+        if (cancelled) return;
+        setAvail({ general: freeSeatsByQuota(seats, "general").length, tatkal: freeSeatsByQuota(seats, "tatkal").length });
+      } catch {
+        if (!cancelled) setAvail({ general: null, tatkal: null });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [train.id, date, cls.code]);
+
+  const full = avail && avail.general === 0;
+  const low = avail && avail.general > 0 && avail.general < 10;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onPick(cls)}
+      className="rounded-lg py-1.5 text-center border border-slate-200 hover:border-blue-900 hover:bg-blue-50 transition-colors"
+    >
+      <div className="text-[11px] font-bold text-slate-700">{cls.code}</div>
+      <div className="text-[10px] text-slate-400 flex items-center justify-center">
+        <IndianRupee size={8} />
+        {Math.round(train.baseFare * cls.fare)}
+      </div>
+      <div className={`text-[9px] font-bold ${!avail ? "text-slate-300" : full ? "text-rose-500" : low ? "text-amber-600" : "text-emerald-600"}`}>
+        {!avail ? "..." : full ? "WL" : `${avail.general} left`}
+      </div>
+    </button>
+  );
+}
+
+// Tatkal booking panel: shows the real opening-time rule per class, a live
+// countdown if it hasn't opened yet, and separate Tatkal-quota availability
+// once it has.
+function TatkalPanel({ train, date, passengerCount, onPick }) {
+  const [now, setNow] = useState(() => Date.now());
+  const [avail, setAvail] = useState({});
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const results = {};
+      await Promise.all(
+        CLASSES.map(async (c) => {
+          try {
+            const seats = await fetchSeats(train.id, date, c.code);
+            results[c.code] = freeSeatsByQuota(seats, "tatkal").length;
+          } catch {
+            results[c.code] = null;
+          }
+        })
+      );
+      if (!cancelled) setAvail(results);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [train.id, date]);
+
+  return (
+    <div className="mt-2 border border-amber-200 bg-amber-50/50 rounded-xl overflow-hidden">
+      <div className="px-3 py-2 text-[11px] text-amber-800 border-b border-amber-200">
+        Tatkal opens 10:00 (AC classes) / 11:00 (Sleeper) the day before travel, from a small separate seat quota, at a premium fare.
+      </div>
+      {CLASSES.map((c) => {
+        const win = tatkalWindow(date, c.code);
+        const free = avail[c.code];
+        const surcharge = TATKAL_SURCHARGE_PERCENT[c.code] || 25;
+        const fare = Math.round(train.baseFare * c.fare * (1 + surcharge / 100)) * passengerCount;
+        return (
+          <button
+            type="button"
+            key={c.code}
+            disabled={!win.isOpen || free === 0}
+            onClick={() => onPick(c)}
+            className="w-full flex items-center justify-between px-3 py-2 text-sm border-b last:border-b-0 border-amber-100 hover:bg-amber-100/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="flex items-center gap-2">
+              <span className="font-bold text-slate-700 w-8">{c.code}</span>
+              <span className="font-bold text-slate-800 flex items-center">
+                <IndianRupee size={11} />
+                {fare}
+              </span>
+            </span>
+            <span className="text-[11px] text-right">
+              {win.hasPassed ? (
+                <span className="text-slate-400">Closed</span>) : win.isOpen ? (
+                free === null ? (
+                  <span className="text-slate-400">...</span>
+                ) : free === 0 ? (
+                  <span className="text-rose-500 font-bold">Full</span>
+                ) : (
+                  <span className="text-emerald-700 font-bold">{free} left - tap to book</span>
+                )
+              ) : (
+                <span className="text-amber-700 font-bold">Opens in {formatCountdown(win.msUntilOpen)}</span>
+              )}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function FareCompareList({ train, date, passengerCount, onPick }) {
   const [rows, setRows] = useState(null);
 
@@ -586,7 +797,7 @@ function FareCompareList({ train, date, passengerCount, onPick }) {
     };
   }, [train.id, date, passengerCount]);
 
-  if (!rows) return <div className="text-xs text-slate-400 mt-2">Comparing faresâ€¦</div>;
+  if (!rows) return <div className="text-xs text-slate-400 mt-2">Comparing fares...</div>;
 
   const cheapestConfirmed = rows.find((r) => r.status === "confirmed");
 
@@ -598,7 +809,7 @@ function FareCompareList({ train, date, passengerCount, onPick }) {
           key={r.code}
           onClick={() => onPick(r)}
           className="w-full flex items-center justify-between px-3 py-2 text-sm border-b last:border-b-0 border-slate-100 hover:bg-slate-50"
-                  >
+        >
           <span className="flex items-center gap-2">
             <span className="font-bold text-slate-700 w-8">{r.code}</span>
             <span className="text-xs text-slate-400">{r.label}</span>
@@ -623,7 +834,7 @@ function FareCompareList({ train, date, passengerCount, onPick }) {
 
 // Delay alerts: uses real Web Push (arrives even if the app/tab is closed)
 // when a backend + service worker are available. Falls back to in-app
-// polling â€” clearly labelled, since that only works while this tab is open.
+// polling - clearly labelled, since that only works while this tab is open.
 function DelayAlertToggle({ pnr, trainId, date }) {
   const pushCapable = typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && !!BACKEND_URL;
   const [enabled, setEnabled] = useState(false);
@@ -638,7 +849,7 @@ function DelayAlertToggle({ pnr, trainId, date }) {
         const status = BACKEND_URL
           ? await fetch(`${BACKEND_URL}/api/live-status/${trainId}?date=${date}`).then((r) => r.json())
           : simulateLiveStatus(trainId, date);
-        if (status.delayMinutes >= 15) setBanner(`${status.status} â€” currently at ${status.currentStation}`);
+        if (status.delayMinutes >= 15) setBanner(`${status.status} - currently at ${status.currentStation}`);
       } catch {
         /* ignore transient errors */
       }
@@ -664,7 +875,7 @@ function DelayAlertToggle({ pnr, trainId, date }) {
           return;
         }
       }
-      // No service worker / no backend â€” in-app polling instead, clearly labelled.
+      // No service worker / no backend - in-app polling instead, clearly labelled.
       setMode("inapp");
       setEnabled(true);
     } catch {
@@ -683,7 +894,7 @@ function DelayAlertToggle({ pnr, trainId, date }) {
         disabled={busy}
         className="w-full border-2 border-blue-900 text-blue-900 font-bold rounded-2xl py-2.5 flex items-center justify-center gap-2 text-sm"
       >
-        <Gauge size={14} /> {busy ? "Setting upâ€¦" : "Notify me if this train is delayed"}
+        <Gauge size={14} /> {busy ? "Setting up..." : "Notify me if this train is delayed"}
       </button>
     );
   }
@@ -691,9 +902,9 @@ function DelayAlertToggle({ pnr, trainId, date }) {
   return (
     <div className="text-xs rounded-xl px-3 py-2 border bg-blue-50 border-blue-200 text-blue-800">
       {mode === "push"
-        ? "Delay alerts on â€” you'll get a push notification even if this app is closed."
-        : "Delay alerts on for this session â€” keep this tab open (no backend/service worker connected, so this can't push while closed)."}
-      {banner && <div className="mt-1 font-bold text-amber-700">âš  {banner}</div>}
+        ? "Delay alerts on - you'll get a push notification even if this app is closed."
+        : "Delay alerts on for this session - keep this tab open (no backend/service worker connected, so this can't push while closed)."}
+      {banner && <div className="mt-1 font-bold text-amber-700">[!] {banner}</div>}
     </div>
   );
 }
@@ -758,7 +969,7 @@ function ManageBookingView({ onBack }) {
           const hoursLeft = (departure - new Date()) / 36e5;
           pct = refundPercentage(hoursLeft);
         } else {
-          pct = 0.95; // RAC/WL never held a guaranteed seat â€” refund close to in full
+          pct = 0.95; // RAC/WL never held a guaranteed seat - refund close to in full
         }
         const refundAmount = Math.round(booking.amount * pct);
 
@@ -791,7 +1002,7 @@ function ManageBookingView({ onBack }) {
         <h1 className="text-2xl font-black text-blue-950 mt-6 mb-1" style={{ fontFamily: "Georgia, serif" }}>
           PNR status
         </h1>
-        <p className="text-slate-500 text-sm mb-6">Check your booking or cancel it â€” refunds go back to the UPI account you paid from.</p>
+        <p className="text-slate-500 text-sm mb-6">Check your booking or cancel it - refunds go back to the UPI account you paid from.</p>
 
         <form onSubmit={lookup} className="flex gap-2">
           <input
@@ -801,7 +1012,7 @@ function ManageBookingView({ onBack }) {
             className="flex-1 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold outline-none focus:border-blue-900"
           />
           <button type="submit" disabled={loading} className="bg-blue-900 hover:bg-blue-950 disabled:bg-slate-300 text-white font-bold rounded-2xl px-5">
-            {loading ? "â€¦" : "Check"}
+            {loading ? "..." : "Check"}
           </button>
         </form>
 
@@ -857,11 +1068,11 @@ function ManageBookingView({ onBack }) {
                   disabled={cancelling}
                   className="w-full border-2 border-rose-500 text-rose-600 font-bold rounded-2xl py-2.5 disabled:opacity-50"
                 >
-                  {cancelling ? "Cancellingâ€¦" : "Cancel ticket"}
+                  {cancelling ? "Cancelling..." : "Cancel ticket"}
                 </button>
                 <p className="text-[11px] text-slate-400 mt-2 text-center">
                   {booking.status === "confirmed"
-                    ? "Refund is tiered by time to departure â€” up to 95% if cancelled 48h+ before, nothing inside 4h."
+                    ? "Refund is tiered by time to departure - up to 95% if cancelled 48h+ before, nothing inside 4h."
                     : "RAC/WL bookings never held a guaranteed seat, so cancellation refunds close to the full fare."}
                 </p>
               </div>
@@ -869,9 +1080,252 @@ function ManageBookingView({ onBack }) {
 
             {cancelResult && (
               <div className="bg-emerald-50 border-t border-emerald-200 text-emerald-800 text-xs px-4 py-2.5">
-                Cancelled. â‚¹{cancelResult.refundAmount} ({cancelResult.refundPercent}%) refund initiated to your UPI account.
+                Cancelled. Rs. {cancelResult.refundAmount} ({cancelResult.refundPercent}%) refund initiated to your UPI account.
               </div>
             )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Tatkal Quick-Book: the real problem this solves is that Tatkal windows
+// open for a couple of minutes and filling in stations/train/class/seats/
+// passenger forms from scratch costs precious seconds. Here everything is
+// filled in and validated *before* the window opens; the moment it opens,
+// one tap takes you straight to the payment screen with seats already
+// auto-assigned from the Tatkal quota. It still can't skip the UPI approval
+// itself (that's your bank confirming a real payment, and removing it would
+// be a security hole, not a feature) -- but every step before that is
+// collapsed into one tap.
+function TatkalQuickBookView({ onBack, currentUser, onArmedBook }) {
+  const storageKey = `saved-passengers:${currentUser?.email || "guest"}`;
+  const [from, setFrom] = useState("NDLS");
+  const [to, setTo] = useState("BCT");
+  const [date, setDate] = useState(() => new Date(Date.now() + 86400000).toISOString().slice(0, 10));
+  const [classCode, setClassCode] = useState("3A");
+  const [trains, setTrains] = useState([]);
+  const [trainId, setTrainId] = useState(null);
+  const [savedPassengers, setSavedPassengers] = useState([]);
+  const [selectedIdxs, setSelectedIdxs] = useState([]);
+  const [newName, setNewName] = useState("");
+  const [newAge, setNewAge] = useState("");
+  const [newGender, setNewGender] = useState("M");
+  const [email, setEmail] = useState(currentUser?.email || "");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+  const [armed, setArmed] = useState(null); // { train, cls, passengers, contact }
+  const [nowTick, setNowTick] = useState(Date.now());
+  const [booking, setBooking] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await window.storage.get(storageKey, false);
+        setSavedPassengers(JSON.parse(stored.value));
+      } catch {
+        setSavedPassengers([]);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    setTrains(makeTrains(from, to));
+    setTrainId(null);
+  }, [from, to]);
+
+  useEffect(() => {
+    if (!armed) return;
+    const interval = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [armed]);
+
+  async function addPassenger() {
+    if (!newName.trim() || !newAge) return;
+    const updated = [...savedPassengers, { name: newName.trim(), age: newAge, gender: newGender }];
+    setSavedPassengers(updated);
+    setNewName("");
+    setNewAge("");
+    await window.storage.set(storageKey, JSON.stringify(updated), false).catch(() => {});
+  }
+
+  async function removePassenger(i) {
+    const updated = savedPassengers.filter((_, idx) => idx !== i);
+    setSavedPassengers(updated);
+    setSelectedIdxs((sel) => sel.filter((s) => s !== i).map((s) => (s > i ? s - 1 : s)));
+    await window.storage.set(storageKey, JSON.stringify(updated), false).catch(() => {});
+  }
+
+  function toggleSelect(i) {
+    setSelectedIdxs((sel) => (sel.includes(i) ? sel.filter((s) => s !== i) : [...sel, i]));
+  }
+
+  function arm() {
+    setError("");
+    if (!trainId) return setError("Pick a train first.");
+    if (selectedIdxs.length === 0) return setError("Select at least one saved passenger.");
+    if (!/^[\w.\-]{2,}@[a-zA-Z.]{2,}$/.test(email)) return setError("Enter a valid email.");
+    if (!/^\+?\d{10,13}$/.test(phone.replace(/\s/g, ""))) return setError("Enter a valid phone number.");
+    const win = tatkalWindow(date, classCode);
+    if (win.hasPassed) return setError("Tatkal booking has already closed for this date/class.");
+
+    const train = trains.find((t) => t.id === trainId);
+    const cls = CLASSES.find((c) => c.code === classCode);
+    const passengers = selectedIdxs.map((i) => savedPassengers[i]);
+    setArmed({ train, cls, passengers, contact: { email, phone } });
+  }
+
+  async function bookNow() {
+    setBooking(true);
+    try {
+      const seats = await fetchSeats(armed.train.id, date, armed.cls.code);
+      const freeTatkal = seats.filter((s) => !s.booked && s.quota === "tatkal");
+      const needed = armed.passengers.length;
+      const seatNos = freeTatkal.slice(0, needed).map((s) => s.seatNo);
+      const preview = freeTatkal.length >= needed ? { status: "confirmed" } : { status: "WL", position: 1 };
+      onArmedBook({
+        from,
+        to,
+        date,
+        train: armed.train,
+        cls: armed.cls,
+        passengers: armed.passengers,
+        contact: armed.contact,
+        seats,
+        seatNos,
+        preview,
+      });
+    } finally {
+      setBooking(false);
+    }
+  }
+
+  const win = armed ? tatkalWindow(date, armed.cls.code) : null;
+  const isOpen = win && nowTick >= win.opensAt.getTime();
+
+  return (
+    <div className="min-h-screen bg-[#F6F5F1]" style={{ fontFamily: "'Trebuchet MS', 'Segoe UI', sans-serif" }}>
+      <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col">
+        <Header onBack={onBack} />
+        <h1 className="text-2xl font-black text-blue-950 mt-6 mb-1 flex items-center gap-2" style={{ fontFamily: "Georgia, serif" }}>
+          <Clock size={22} /> Tatkal Quick-Book
+        </h1>
+        <p className="text-slate-500 text-sm mb-6">Set everything up now. When the window opens, one tap takes you straight to payment.</p>
+
+        {error && <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-3 py-2 mb-4">{error}</div>}
+
+        {!armed ? (
+          <>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-4">
+              <StationInput label="From" value={from} onChange={setFrom} iconColor="#1e3a8a" otherCode={to} />
+              <div className="h-px bg-slate-100" />
+              <StationInput label="To" value={to} onChange={setTo} iconColor="#f59e0b" otherCode={from} />
+              <div className="h-px bg-slate-100" />
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wide">Journey date</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Calendar size={16} className="text-slate-400 shrink-0" />
+                  <input type="date" value={date} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setDate(e.target.value)} className="w-full bg-transparent font-semibold text-slate-800 outline-none" />
+                </div>
+              </div>
+              <div className="h-px bg-slate-100" />
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wide">Class</label>
+                <div className="grid grid-cols-4 gap-1.5 mt-1">
+                  {CLASSES.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => setClassCode(c.code)}
+                      className={`rounded-lg py-1.5 text-xs font-bold border ${classCode === c.code ? "border-blue-900 bg-blue-900 text-white" : "border-slate-200 text-slate-600"}`}
+                    >
+                      {c.code}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="h-px bg-slate-100" />
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wide">Train</label>
+                <div className="space-y-1.5 mt-1">
+                  {trains.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTrainId(t.id)}
+                      className={`w-full text-left rounded-lg px-3 py-2 text-sm border ${trainId === t.id ? "border-blue-900 bg-blue-50" : "border-slate-200"}`}
+                    >
+                      <span className="font-bold text-slate-700">{t.name}</span>
+                      <span className="text-xs text-slate-400 ml-2">{t.dep} - {t.arr}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mt-4">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Saved passengers</div>
+              {savedPassengers.length === 0 && <div className="text-xs text-slate-400 mb-2">No saved passengers yet -- add them once, reuse every Tatkal rush.</div>}
+              {savedPassengers.map((p, i) => (
+                <label key={i} className="flex items-center justify-between py-1.5 border-b last:border-b-0 border-slate-100 text-sm">
+                  <span className="flex items-center gap-2">
+                    <input type="checkbox" checked={selectedIdxs.includes(i)} onChange={() => toggleSelect(i)} className="w-4 h-4" />
+                    {p.name}, {p.age}{p.gender}
+                  </span>
+                  <button type="button" onClick={() => removePassenger(i)} className="text-xs text-rose-500 font-semibold">Remove</button>
+                </label>
+              ))}
+              <div className="flex gap-2 mt-3">
+                <input placeholder="Name" value={newName} onChange={(e) => setNewName(e.target.value)} className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-900" />
+                <input placeholder="Age" type="number" value={newAge} onChange={(e) => setNewAge(e.target.value)} className="w-16 border border-slate-200 rounded-xl px-2 py-2 text-sm outline-none focus:border-blue-900" />
+                <select value={newGender} onChange={(e) => setNewGender(e.target.value)} className="border border-slate-200 rounded-xl px-2 py-2 text-sm outline-none focus:border-blue-900">
+                  <option value="M">M</option>
+                  <option value="F">F</option>
+                  <option value="O">O</option>
+                </select>
+                <button type="button" onClick={addPassenger} className="bg-blue-900 text-white font-bold rounded-xl px-3 text-sm">Add</button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mt-4">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Contact</div>
+              <div className="flex gap-2">
+                <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-900" />
+                <input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-36 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-900" />
+              </div>
+            </div>
+
+            <button onClick={arm} className="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-blue-950 font-black rounded-2xl py-3.5">
+              Arm for Tatkal
+            </button>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 w-full">
+              <div className="text-sm font-bold text-slate-800 mb-1">{armed.train.name} . {armed.cls.label}</div>
+              <div className="text-xs text-slate-400 mb-4">
+                {findStation(from).code} -&gt; {findStation(to).code} . {date} . {armed.passengers.length} passenger{armed.passengers.length > 1 ? "s" : ""}
+              </div>
+              {!isOpen ? (
+                <>
+                  <div className="text-xs text-slate-400 mb-1">Tatkal opens in</div>
+                  <div className="text-4xl font-black text-amber-600 mb-1">{formatCountdown(win.opensAt.getTime() - nowTick)}</div>
+                  <div className="text-[11px] text-slate-400">Keep this screen open -- the button below activates the instant it opens.</div>
+                </>
+              ) : (
+                <button
+                  onClick={bookNow}
+                  disabled={booking}
+                  className="w-full bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white font-black text-lg rounded-2xl py-5 animate-pulse"
+                >
+                  {booking ? "Booking..." : "BOOK NOW"}
+                </button>
+              )}
+            </div>
+            <button onClick={() => setArmed(null)} className="mt-4 text-sm font-bold text-blue-900">
+              Change details
+            </button>
           </div>
         )}
       </div>
@@ -905,7 +1359,7 @@ function AuthView({ onBack, onAuthed }) {
         if (!res.ok) throw new Error(data.error || "Authentication failed");
         onAuthed({ token: data.token, user: { name: data.name, email: data.email } });
       } else {
-        // No backend â€” a lightweight local "account" so booking history has an owner.
+        // No backend - a lightweight local "account" so booking history has an owner.
         // This does not verify a password against anything server-side; deploy the
         // backend for real authentication.
         const stored = await window.storage.get(`localaccount:${email}`, false).catch(() => null);
@@ -928,7 +1382,7 @@ function AuthView({ onBack, onAuthed }) {
           {mode === "login" ? "Log in" : "Create an account"}
         </h1>
         <p className="text-slate-500 text-sm mb-6">
-          {BACKEND_URL ? "So we can save your booking history." : "Demo mode â€” no real password check without a connected backend."}
+          {BACKEND_URL ? "So we can save your booking history." : "Demo mode - no real password check without a connected backend."}
         </p>
 
         <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
@@ -960,7 +1414,7 @@ function AuthView({ onBack, onAuthed }) {
             disabled={loading}
             className="w-full bg-blue-900 hover:bg-blue-950 disabled:bg-slate-300 text-white font-bold rounded-2xl py-3"
           >
-            {loading ? "â€¦" : mode === "login" ? "Log in" : "Sign up"}
+            {loading ? "..." : mode === "login" ? "Log in" : "Sign up"}
           </button>
         </form>
 
@@ -982,8 +1436,7 @@ function HistoryView({ onBack, authToken, currentUser }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    (async () => {
-      try {
+    (async () => {try {
         if (BACKEND_URL) {
           const res = await fetch(`${BACKEND_URL}/api/bookings`, { headers: { Authorization: `Bearer ${authToken}` } });
           const data = await res.json();
@@ -1019,9 +1472,9 @@ function HistoryView({ onBack, authToken, currentUser }) {
         <h1 className="text-2xl font-black text-blue-950 mt-6 mb-1" style={{ fontFamily: "Georgia, serif" }}>
           My bookings
         </h1>
-        <p className="text-slate-500 text-sm mb-6">Hi {currentUser?.name} â€” here's everything you've booked.</p>
+        <p className="text-slate-500 text-sm mb-6">Hi {currentUser?.name} - here's everything you've booked.</p>
 
-        {loading && <div className="text-sm text-slate-400 text-center py-8">Loadingâ€¦</div>}
+        {loading && <div className="text-sm text-slate-400 text-center py-8">Loading...</div>}
         {error && <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-3 py-2">{error}</div>}
         {!loading && bookings.length === 0 && <div className="text-sm text-slate-400 text-center py-8">No bookings yet.</div>}
 
@@ -1032,7 +1485,7 @@ function HistoryView({ onBack, authToken, currentUser }) {
                 <span className="font-bold text-sm text-slate-800">{b.trainName || b.trainId}</span>
                 <StatusPill status={b.status} />
               </div>
-              <div className="text-xs text-slate-400">PNR {b.pnr} Â· {b.date} Â· {b.className || b.classCode}</div>
+              <div className="text-xs text-slate-400">PNR {b.pnr} . {b.date} . {b.className || b.classCode}</div>
             </div>
           ))}
         </div>
@@ -1098,7 +1551,7 @@ function LiveStatusView({ onBack }) {
           disabled={loading}
           className="mt-3 w-full bg-blue-900 hover:bg-blue-950 disabled:bg-slate-300 text-white font-bold rounded-2xl py-3"
         >
-          {loading ? "Checkingâ€¦" : "Check status"}
+          {loading ? "Checking..." : "Check status"}
         </button>
 
         {error && <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-3 py-2 mt-4">{error}</div>}
@@ -1112,9 +1565,17 @@ function LiveStatusView({ onBack }) {
               <span className="text-xs text-blue-200">{status.source === "live" ? "Live" : "Simulated"}</span>
             </div>
             <div className="p-4 space-y-2 text-sm">
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-slate-400 text-xs">Status</span>
                 <span className={`font-bold ${status.delayMinutes > 0 ? "text-amber-600" : "text-emerald-600"}`}>{status.status}</span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-50 -mx-4 px-4 py-2">
+                <span className="text-slate-500 text-xs font-semibold">Running late by</span>
+                <span className={`font-black text-base ${status.delayMinutes > 0 ? "text-amber-700" : "text-emerald-700"}`}>
+                  {status.delayMinutes > 0
+                    ? `${status.delayHours ?? Math.floor(status.delayMinutes / 60)} hr ${status.delayMinutesRemainder ?? status.delayMinutes % 60} min`
+                    : "0 min - on time"}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400 text-xs">Currently at</span>
@@ -1122,7 +1583,10 @@ function LiveStatusView({ onBack }) {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400 text-xs">Next stop</span>
-                <span className="font-semibold text-slate-700">{status.nextStation}</span>
+                <span className="font-semibold text-slate-700">
+                  {status.nextStation}
+                  {status.etaNextStationMinutes != null && <span className="text-slate-400 font-normal"> (~{status.etaNextStationMinutes} min)</span>}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400 text-xs">Last updated</span>
@@ -1131,7 +1595,7 @@ function LiveStatusView({ onBack }) {
             </div>
             {status.source !== "live" && (
               <div className="bg-amber-50 border-t border-amber-200 text-amber-800 text-[11px] px-4 py-2">
-                Simulated â€” no live provider connected. See /backend/README.md to wire a real one.
+                Simulated - no live provider connected. See /backend/README.md to wire a real one.
               </div>
             )}
           </div>
@@ -1164,7 +1628,7 @@ function AdminView({ onBack }) {
       } else {
         const idxStored = await window.storage.get("pnr_index", true).catch(() => null);
         const pnrs = idxStored ? JSON.parse(idxStored.value) : [];
-                const loaded = await Promise.all(
+        const loaded = await Promise.all(
           pnrs.map(async (p) => {
             try {
               const rec = await window.storage.get(`bookings:${p}`, true);
@@ -1204,7 +1668,7 @@ function AdminView({ onBack }) {
           <ShieldCheck size={22} /> Admin dashboard
         </h1>
         <p className="text-slate-500 text-sm mb-6">
-          {BACKEND_URL ? "Protected by your server's ADMIN_KEY." : "Local demo mode â€” shows everything booked in this artifact, no real access control."}
+          {BACKEND_URL ? "Protected by your server's ADMIN_KEY." : "Local demo mode - shows everything booked in this artifact, no real access control."}
         </p>
 
         {BACKEND_URL && !unlocked && (
@@ -1217,7 +1681,7 @@ function AdminView({ onBack }) {
               className="flex-1 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold outline-none focus:border-blue-900"
             />
             <button type="submit" disabled={loading} className="bg-blue-900 hover:bg-blue-950 disabled:bg-slate-300 text-white font-bold rounded-2xl px-5">
-              {loading ? "â€¦" : "Unlock"}
+              {loading ? "..." : "Unlock"}
             </button>
           </form>
         )}
@@ -1256,7 +1720,7 @@ function AdminView({ onBack }) {
                     <StatusPill status={b.status} />
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">
-                    PNR {b.pnr} Â· {b.date} Â· {b.className || b.classCode} Â· â‚¹{b.amount}
+                    PNR {b.pnr} . {b.date} . {b.className || b.classCode} . Rs. {b.amount}
                   </div>
                 </div>
               ))}
@@ -1300,7 +1764,9 @@ export default function App() {
   const [completedLegs, setCompletedLegs] = useState([]);
   const [reservationPreview, setReservationPreview] = useState(null); // { status: 'confirmed'|'RAC'|'WL', position? }
   const [ticketStatus, setTicketStatus] = useState("confirmed");
+  const [bookingQuota, setBookingQuota] = useState("general"); // "general" | "tatkal"
   const [compareOpenId, setCompareOpenId] = useState(null);
+  const [tatkalOpenId, setTatkalOpenId] = useState(null);
   const [lang, setLang] = useState("en");
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [redeemPoints, setRedeemPoints] = useState(0);
@@ -1397,21 +1863,30 @@ export default function App() {
     setStep(1);
   }
 
-  async function chooseClass(train, cls) {
+  async function chooseClass(train, cls, quota = "general") {
+    if (quota === "tatkal" && !tatkalWindow(date, cls.code).isOpen) {
+      return setError("Tatkal booking isn't open yet for this class.");
+    }
     setSelectedTrain(train);
     setSelectedClass(cls);
     setSelectedSeats([]);
     setReservationPreview(null);
+    setBookingQuota(quota);
     setError("");
     setSeatsLoading(true);
     setStep(2);
     try {
       const s = await fetchSeats(train.id, date, cls.code);
       setSeats(s);
-      const preview = BACKEND_URL
-        ? await fetch(`${BACKEND_URL}/api/waitlist/preview?trainId=${train.id}&date=${date}&classCode=${cls.code}&count=${passengerCount}`).then((r) => r.json())
-        : await previewReservation(train.id, date, cls.code, passengerCount);
-      setReservationPreview(preview);
+      if (quota === "tatkal") {
+        const freeTatkal = freeSeatsByQuota(s, "tatkal").length;
+        setReservationPreview(freeTatkal >= passengerCount ? { status: "confirmed" } : { status: "WL", position: 1 });
+      } else {
+        const preview = BACKEND_URL
+          ? await fetch(`${BACKEND_URL}/api/waitlist/preview?trainId=${train.id}&date=${date}&classCode=${cls.code}&count=${passengerCount}`).then((r) => r.json())
+          : await previewReservation(train.id, date, cls.code, passengerCount);
+        setReservationPreview(preview);
+      }
     } catch (err) {
       setError("Couldn't load the seat map. " + err.message);
     } finally {
@@ -1453,7 +1928,7 @@ export default function App() {
     setStep(4);
   }
 
-  // Group booking discount â€” tiered like many real travel platforms offer
+  // Group booking discount - tiered like many real travel platforms offer
   // for larger parties booked together.
   function groupDiscountPercent(count) {
     if (count >= 10) return 10;
@@ -1466,12 +1941,15 @@ export default function App() {
   }
 
   function fareBreakdown() {
-    if (!selectedTrain) return { subtotal: 0, discountPercent: 0, discountAmount: 0, mealCost: 0, pointsDiscount: 0, total: 0 };
+    if (!selectedTrain) return { subtotal: 0, discountPercent: 0, discountAmount: 0, mealCost: 0, pointsDiscount: 0, tatkalSurcharge: 0, total: 0 };
     const fareSubtotal = Math.round(selectedTrain.baseFare * selectedClass.fare) * passengers.length;
-    const discountPercent = groupDiscountPercent(passengers.length);
+    const tatkalSurcharge =
+      bookingQuota === "tatkal" ? Math.round((fareSubtotal * (TATKAL_SURCHARGE_PERCENT[selectedClass.code] || 25)) / 100) : 0;
+    // Group discounts don't apply to Tatkal fares in real IRCTC either -- Tatkal is already a premium quota.
+    const discountPercent = bookingQuota === "tatkal" ? 0 : groupDiscountPercent(passengers.length);
     const discountAmount = Math.round((fareSubtotal * discountPercent) / 100);
     const mealCost = mealTotal();
-    const afterDiscount = fareSubtotal - discountAmount + mealCost;
+    const afterDiscount = fareSubtotal + tatkalSurcharge - discountAmount + mealCost;
     const maxRedeemable = Math.min(loyaltyPoints, Math.floor(afterDiscount * 0.5));
     const pointsDiscount = Math.min(redeemPoints, maxRedeemable);
     return {
@@ -1479,6 +1957,7 @@ export default function App() {
       discountPercent,
       discountAmount,
       mealCost,
+      tatkalSurcharge,
       maxRedeemable,
       pointsDiscount,
       total: afterDiscount - pointsDiscount,
@@ -1559,14 +2038,17 @@ export default function App() {
         return;
       }
 
-      // No backend configured â€” simulate the same round trip locally.
+      // No backend configured - simulate the same round trip locally.
       await new Promise((r) => setTimeout(r, 1800));
       const generatedPnr = String(Math.floor(2000000000 + Math.random() * 799999999));
 
       let finalSeatNos = selectedSeats;
       let waitlistStatus = null;
       if (!isSeatmap) {
-        const result = await reserveOrWaitlistLocal(selectedTrain.id, date, selectedClass.code, passengers.length, generatedPnr);
+        const result =
+          bookingQuota === "tatkal"
+            ? await reserveOrWaitlistTatkalLocal(selectedTrain.id, date, selectedClass.code, passengers.length, generatedPnr)
+            : await reserveOrWaitlistLocal(selectedTrain.id, date, selectedClass.code, passengers.length, generatedPnr);
         finalSeatNos = result.seatNos;
         if (result.status !== "confirmed") waitlistStatus = { status: result.status, position: result.position };
       }
@@ -1590,6 +2072,8 @@ export default function App() {
           amount: totalFare(),
           status: finalStatus,
           waitlistStatus,
+          quota: bookingQuota,
+          meals,
         }),
         true
       );
@@ -1637,7 +2121,7 @@ export default function App() {
     setCompletedLegs(nextCompleted);
 
     const nextIdx = legIndex + 1;
-    if (nextIdx >= itinerary.length) return; // last leg â€” ticket screen shows the full itinerary instead
+    if (nextIdx >= itinerary.length) return; // last leg - ticket screen shows the full itinerary instead
 
     const leg = itinerary[nextIdx];
     setLegIndex(nextIdx);
@@ -1673,6 +2157,7 @@ export default function App() {
     setCompletedLegs([]);
     setReservationPreview(null);
     setTicketStatus("confirmed");
+    setBookingQuota("general");
   }
 
   if (view === "manage") {
@@ -1690,6 +2175,32 @@ export default function App() {
   if (view === "admin") {
     return <AdminView onBack={() => setView("booking")} />;
   }
+  if (view === "tatkalQuick") {
+    return (
+      <TatkalQuickBookView
+        onBack={() => setView("booking")}
+        currentUser={currentUser}
+        onArmedBook={({ from: f, to: tt, date: d, train, cls, passengers: p, contact: c, seats: s, seatNos, preview }) => {
+          setFrom(f);
+          setTo(tt);
+          setDate(d);
+          setSelectedTrain(train);
+          setSelectedClass(cls);
+          setBookingQuota("tatkal");
+          setPassengers(p);
+          setPassengerCount(p.length);
+          setContact(c);
+          setSeats(s);
+          setSelectedSeats(seatNos);
+          setReservationPreview(preview);
+          setTicketStatus(preview.status);
+          setError("");
+          setView("booking");
+          setStep(4);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F6F5F1]" style={{ fontFamily: "'Trebuchet MS', 'Segoe UI', sans-serif" }}>
@@ -1701,12 +2212,11 @@ export default function App() {
 
         {error && <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-3 py-2 mb-4">{error}</div>}
         {!BACKEND_URL && step === 0 && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-3 py-2 mb-4">
-            Running in self-contained demo mode â€” seat map is real and persistent, payment is simulated. Set <code className="font-mono">BACKEND_URL</code> to connect a live Razorpay UPI backend (see /backend in your download).
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-3 py-2 mb-4">Running in self-contained demo mode - seat map is real and persistent, payment is simulated. Set <code className="font-mono">BACKEND_URL</code> to connect a live Razorpay UPI backend (see /backend in your download).
           </div>
         )}
 
-        {/* STEP 0 â€” SEARCH */}
+        {/* STEP 0 - SEARCH */}
         {step === 0 && (
           <form onSubmit={handleSearch} className="flex-1 flex flex-col">
             <div className="flex justify-end mb-2">
@@ -1715,7 +2225,7 @@ export default function App() {
                   <button type="button" onClick={() => setView("history")} className="flex items-center gap-1 font-bold text-blue-900">
                     <History size={13} /> My bookings
                   </button>
-                  <span className="text-slate-300">Â·</span>
+                  <span className="text-slate-300">.</span>
                   <span className="text-slate-500 flex items-center gap-1">
                     <UserCircle2 size={13} /> {currentUser.name}
                   </span>
@@ -1790,7 +2300,7 @@ export default function App() {
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wide">Return date</label>
                     <div className="flex items-center gap-2 mt-1">
                       <Calendar size={16} className="text-amber-500 shrink-0" />
-                                            <input
+                      <input
                         type="date"
                         value={returnDate}
                         min={date}
@@ -1867,7 +2377,7 @@ export default function App() {
                   <Users size={16} className="text-slate-400 shrink-0" />
                   <div className="flex items-center gap-3">
                     <button type="button" onClick={() => setPassengerCount((n) => Math.max(1, n - 1))} className="w-7 h-7 rounded-full bg-slate-100 font-bold text-slate-600">
-                      âˆ’
+                      -
                     </button>
                     <span className="font-bold text-slate-800 w-4 text-center">{passengerCount}</span>
                     <button type="button" onClick={() => setPassengerCount((n) => Math.min(6, n + 1))} className="w-7 h-7 rounded-full bg-slate-100 font-bold text-slate-600">
@@ -1881,11 +2391,23 @@ export default function App() {
             <button type="submit" className="mt-6 bg-blue-900 hover:bg-blue-950 text-white font-bold rounded-2xl py-3.5 flex items-center justify-center gap-2 transition-colors">
               Search trains <ArrowRight size={18} />
             </button>
+
+            <button
+              type="button"
+              onClick={() => setView("tatkalQuick")}
+              className="mt-3 w-full bg-amber-500 hover:bg-amber-600 text-blue-950 font-black rounded-2xl py-3.5 flex items-center justify-center gap-2"
+            >
+              <Clock size={18} /> Tatkal Quick-Book
+            </button>
+            <p className="text-[11px] text-slate-400 text-center mt-1.5">
+              Set up in advance, book with one tap the instant Tatkal opens
+            </p>
+
             <div className="flex items-center justify-center gap-4 mt-3">
               <button type="button" onClick={() => setView("manage")} className="text-sm font-bold text-blue-900">
                 PNR status / cancel
               </button>
-              <span className="text-slate-300">Â·</span>
+              <span className="text-slate-300">.</span>
               <button type="button" onClick={() => setView("live")} className="text-sm font-bold text-blue-900 flex items-center gap-1">
                 <Gauge size={14} /> Live train status
               </button>
@@ -1896,7 +2418,7 @@ export default function App() {
           </form>
         )}
 
-        {/* STEP 1 â€” SELECT TRAIN + CLASS */}
+        {/* STEP 1 - SELECT TRAIN + CLASS */}
         {step === 1 && (
           <div className="flex-1 flex flex-col">
             <div className="flex items-baseline justify-between mb-4">
@@ -1932,17 +2454,7 @@ export default function App() {
 
                   <div className="grid grid-cols-4 gap-1.5 mt-3">
                     {CLASSES.map((c) => (
-                      <button
-                        key={c.code}
-                        onClick={() => chooseClass(t, c)}
-                        className="rounded-lg py-1.5 text-center border border-slate-200 hover:border-blue-900 hover:bg-blue-50 transition-colors"
-                      >
-                        <div className="text-[11px] font-bold text-slate-700">{c.code}</div>
-                        <div className="text-[10px] text-slate-400 flex items-center justify-center">
-                          <IndianRupee size={8} />
-                          {Math.round(t.baseFare * c.fare)}
-                        </div>
-                      </button>
+                      <ClassAvailabilityButton key={c.code} train={t} date={date} cls={c} onPick={(cls) => chooseClass(t, cls)} />
                     ))}
                   </div>
 
@@ -1954,20 +2466,36 @@ export default function App() {
                     <Gauge size={11} /> {compareOpenId === t.id ? "Hide fare comparison" : "Compare fares & availability"}
                   </button>
                   {compareOpenId === t.id && <FareCompareList train={t} date={date} passengerCount={passengerCount} onPick={(cls) => chooseClass(t, cls)} />}
+
+                  <button
+                    type="button"
+                    onClick={() => setTatkalOpenId((cur) => (cur === t.id ? null : t.id))}
+                    className="mt-2 text-[11px] font-bold text-amber-700 flex items-center gap-1"
+                  >
+                    <Clock size={11} /> {tatkalOpenId === t.id ? "Hide Tatkal booking" : "Tatkal booking"}
+                  </button>
+                  {tatkalOpenId === t.id && (
+                    <TatkalPanel train={t} date={date} passengerCount={passengerCount} onPick={(cls) => chooseClass(t, cls, "tatkal")} />
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* STEP 2 â€” SEAT MAP */}
+        {/* STEP 2 - SEAT MAP */}
         {step === 2 && selectedTrain && (
           <div className="flex-1 flex flex-col">
-            <h2 className="text-lg font-black text-blue-950 mb-1" style={{ fontFamily: "Georgia, serif" }}>
+            <h2 className="text-lg font-black text-blue-950 mb-1 flex items-center gap-2" style={{ fontFamily: "Georgia, serif" }}>
               Pick your berth{passengerCount > 1 ? "s" : ""}
+              {bookingQuota === "tatkal" && (
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                  TATKAL
+                </span>
+              )}
             </h2>
             <p className="text-xs text-slate-400 mb-4">
-              {selectedTrain.name} Â· {selectedClass.label} Â· Coach S4 Â· Select {passengerCount} of {selectedSeats.length}/{passengerCount} chosen
+              {selectedTrain.name} . {selectedClass.label} . Coach S4 . Select {passengerCount} of {selectedSeats.length}/{passengerCount} chosen
             </p>
 
             <div className="flex gap-3 text-[10px] text-slate-500 mb-3">
@@ -1979,10 +2507,10 @@ export default function App() {
             </div>
 
             {seatsLoading ? (
-              <div className="flex-1 flex items-center justify-center text-sm text-slate-400">Loading seat mapâ€¦</div>
+              <div className="flex-1 flex items-center justify-center text-sm text-slate-400">Loading seat map...</div>
             ) : (
               <div className="flex-1 overflow-y-auto pb-3" style={{ maxHeight: "52vh" }}>
-                <SeatMap seats={seats} needed={passengerCount} selected={selectedSeats} onToggle={toggleSeat} />
+                <SeatMap seats={visibleSeatsForQuota(seats, bookingQuota)} needed={passengerCount} selected={selectedSeats} onToggle={toggleSeat} />
               </div>
             )}
 
@@ -1996,14 +2524,14 @@ export default function App() {
           </div>
         )}
 
-        {/* STEP 3 â€” PASSENGER DETAILS */}
+        {/* STEP 3 - PASSENGER DETAILS */}
         {step === 3 && selectedTrain && (
           <form onSubmit={proceedToPay} className="flex-1 flex flex-col">
             <h2 className="text-lg font-black text-blue-950 mb-1" style={{ fontFamily: "Georgia, serif" }}>
               Passenger details
             </h2>
             <p className="text-xs text-slate-400 mb-4">
-              {selectedTrain.name} Â· {selectedClass.label} Â· Berths {selectedSeats.join(", ")}
+              {selectedTrain.name} . {selectedClass.label} . Berths {selectedSeats.join(", ")}
             </p>
 
             <div className="space-y-3">
@@ -2011,7 +2539,7 @@ export default function App() {
                 <div key={i} className="bg-white rounded-2xl border border-slate-200 p-3.5">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                      <Users size={12} /> Passenger {i + 1} Â· Berth {selectedSeats[i]}
+                      <Users size={12} /> Passenger {i + 1} . Berth {selectedSeats[i]}
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -2061,22 +2589,31 @@ export default function App() {
                   className="w-36 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-blue-900"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1.5">We'll send your ticket by email and SMS â€” no OTP needed to book.</p>
+              <p className="text-[11px] text-slate-400 mt-1.5">We'll send your ticket by email and SMS - no OTP needed to book.</p>
             </div>
 
             <div className="mt-auto pt-6">
               <div className="flex justify-between items-center text-sm text-slate-500">
-                <span>Subtotal Â· {passengers.length} pax</span>
+                <span>Subtotal . {passengers.length} pax</span>
                 <span className="font-semibold text-slate-700 flex items-center">
                   <IndianRupee size={13} />
                   {fareBreakdown().subtotal}
                 </span>
               </div>
+              {bookingQuota === "tatkal" && (
+                <div className="flex justify-between items-center text-sm text-amber-700 mt-1">
+                  <span>Tatkal surcharge ({TATKAL_SURCHARGE_PERCENT[selectedClass.code] || 25}%)</span>
+                  <span className="font-semibold flex items-center">
+                    + <IndianRupee size={13} />
+                    {fareBreakdown().tatkalSurcharge}
+                  </span>
+                </div>
+              )}
               {fareBreakdown().discountPercent > 0 && (
                 <div className="flex justify-between items-center text-sm text-emerald-600 mt-1">
                   <span>Group discount ({fareBreakdown().discountPercent}%)</span>
                   <span className="font-semibold flex items-center">
-                    âˆ’ <IndianRupee size={13} />
+                    - <IndianRupee size={13} />
                     {fareBreakdown().discountAmount}
                   </span>
                 </div>
@@ -2100,13 +2637,13 @@ export default function App() {
           </form>
         )}
 
-        {/* STEP 4 â€” UPI PAYMENT */}
+        {/* STEP 4 - UPI PAYMENT */}
         {step === 4 && selectedTrain && (
           <form onSubmit={handlePay} className="flex-1 flex flex-col">
             <h2 className="text-lg font-black text-blue-950 mb-1" style={{ fontFamily: "Georgia, serif" }}>
               Pay with UPI
             </h2>
-            <p className="text-xs text-slate-400 mb-5">No cards, no OTP â€” approve the request in your UPI app.</p>
+            <p className="text-xs text-slate-400 mb-5">No cards, no OTP - approve the request in your UPI app.</p>
 
             <div className="bg-blue-950 text-white rounded-2xl p-4 mb-5">
               <div className="flex items-center justify-between">
@@ -2118,7 +2655,12 @@ export default function App() {
               </div>
               {fareBreakdown().discountPercent > 0 && (
                 <div className="text-[11px] text-emerald-300 mt-1">
-                  Includes {fareBreakdown().discountPercent}% group discount (âˆ’â‚¹{fareBreakdown().discountAmount})
+                  Includes {fareBreakdown().discountPercent}% group discount (-Rs. {fareBreakdown().discountAmount})
+                </div>
+              )}
+              {bookingQuota === "tatkal" && (
+                <div className="text-[11px] text-amber-300 mt-1">
+                  Includes Tatkal surcharge (+Rs. {fareBreakdown().tatkalSurcharge})
                 </div>
               )}
             </div>
@@ -2160,20 +2702,25 @@ export default function App() {
               disabled={!upiApp || paying}
               className="mt-auto w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 disabled:text-slate-400 text-blue-950 font-black rounded-2xl py-3.5 flex items-center justify-center gap-2"
             >
-              {paying ? "Waiting for approvalâ€¦" : `Pay â‚¹${totalFare()}`}
+              {paying ? "Waiting for approval..." : `Pay Rs. ${totalFare()}`}
             </button>
           </form>
         )}
 
-        {/* STEP 5 â€” TICKET */}
+        {/* STEP 5 - TICKET */}
         {step === 5 && selectedTrain && (
           <div className="flex-1 flex flex-col">
             <div className="flex flex-col items-center text-center mb-5">
               <CheckCircle2 className={ticketStatus === "confirmed" ? "text-emerald-500 mb-2" : "text-amber-500 mb-2"} size={40} />
-              <h2 className="text-lg font-black text-blue-950" style={{ fontFamily: "Georgia, serif" }}>
-                {ticketStatus === "confirmed" ? "Booking confirmed" : `Booking ${ticketStatus} â€” added to queue`}
+              <h2 className="text-lg font-black text-blue-950 flex items-center gap-2" style={{ fontFamily: "Georgia, serif" }}>
+                {ticketStatus === "confirmed" ? "Booking confirmed" : `Booking ${ticketStatus} - added to queue`}
+                {bookingQuota === "tatkal" && (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                    TATKAL
+                  </span>
+                )}
               </h2>
-              <p className="text-xs text-slate-400">Paid via UPI Â· no OTP needed</p>
+              <p className="text-xs text-slate-400">Paid via UPI . no OTP needed</p>
             </div>
 
             {itinerary.length > 1 && (
@@ -2189,11 +2736,11 @@ export default function App() {
             {completedLegs.map((leg, i) => (
               <div key={leg.pnr} className="bg-white rounded-2xl border border-slate-200 p-3.5 mb-3">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-sm text-slate-800">Leg {i + 1} Â· {leg.trainName}</span>
+                  <span className="font-bold text-sm text-slate-800">Leg {i + 1} . {leg.trainName}</span>
                   <StatusPill status={leg.status} />
                 </div>
                 <div className="text-xs text-slate-400">
-                  PNR {leg.pnr} Â· {leg.from.split(" ")[0]} â†’ {leg.to.split(" ")[0]} Â· {leg.date} Â· Berths {leg.seatNos.join(", ") || "â€”"}
+                  PNR {leg.pnr} . {leg.from.split(" ")[0]} -> {leg.to.split(" ")[0]} . {leg.date} . Berths {leg.seatNos.join(", ") || "-"}
                 </div>
               </div>
             ))}
@@ -2208,7 +2755,7 @@ export default function App() {
               <div className="p-4 flex justify-center">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-                    `RailYatra|PNR:${pnr}|Train:${selectedTrain.id}|Date:${date}|Berths:${selectedSeats.join(",")}`
+                    `ChukChuk|PNR:${pnr}|Train:${selectedTrain.id}|Date:${date}|Berths:${selectedSeats.join(",")}`
                   )}`}
                   alt={`QR code for PNR ${pnr}`}
                   width={140}
